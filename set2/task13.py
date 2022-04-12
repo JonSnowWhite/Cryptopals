@@ -12,6 +12,13 @@ def dict_to_cookie(dct: dict):
         cookie = f'{cookie}{key}={value}&'
     return cookie[:-1]
 
+def profile_for(email: str):
+    dct = {}
+    email = email.replace("&","").replace("=","")
+    dct['email'] = email
+    dct['uid'] = 10
+    dct['role'] = 'user'
+
 cookie = 'cool=yes&who=asked&test=2'
-print(dict_to_cookie(cookie_to_dict(cookie)))
 assert dict_to_cookie(cookie_to_dict(cookie)) == cookie
+
