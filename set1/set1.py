@@ -34,7 +34,7 @@ def xor(a: str, b: str):
     a, b = h_b(a), h_b(b)
     return b_h(bytes(a ^ b for a, b in zip(a, b)))
 
-def xor_bytes(a: str, b: str):
+def xor_bytes(a: bytes, b: bytes):
     return b_h(bytes(a ^ b for a, b in zip(a, b)))
 
 # task 3 single byte xor
@@ -157,10 +157,9 @@ def break_repeating_xor(cipher_file: str):
 
 def task7():
     with open('set1/data/aes_ecb.txt') as file:
-        return decrypt_aes_cbc(b64_b(file.read()), "YELLOW SUBMARINE".encode('ASCII')).decode('ASCII')
+        return decrypt_aes_ecb(b64_b(file.read()), "YELLOW SUBMARINE".encode('ASCII')).decode('ASCII')
 
-def decrypt_aes_cbc(cipher: bytes, key: bytes):
-    BLOCK_LENGTH = 128
+def decrypt_aes_ecb(cipher: bytes, key: bytes):
     alg = AES.new(key, AES.MODE_ECB)
     return alg.decrypt(cipher)
 
