@@ -1,30 +1,21 @@
-import base64
+import os
+import random
 from Crypto.Cipher import AES
 
-# from set1
-
-def base64_to_bytes(x: str):
-    return base64.b64decode(x)
-
-def b64_b(x):
-    return base64_to_bytes(x)
+# from set 1
 
 def xor_bytes(a: bytes, b: bytes):
     return bytes(a ^ b for a, b in zip(a, b))
 
-def decrypt_aes_ecb(cipher: bytes, key: bytes):
+# ecb mode from before
+
+def encrypt_aes_ecb(message: bytes, key: bytes):
+    # pad message
+    message = pkcs7_pad(message, 16)
     alg = AES.new(key, AES.MODE_ECB)
-    return alg.decrypt(cipher)
+    return alg.encrypt(message)
 
-def encrypt_aes_ecb(cipher: bytes, key: bytes):
-    alg = AES.new(key, AES.MODE_ECB)
-    return alg.encrypt(cipher)
-
-m = b'1234567890123456'
-k =  b'6543210987654321'
-assert decrypt_aes_ecb(encrypt_aes_ecb(m, k), k) == m
-
-# from set2
+# cbc mode from before
 
 def pkcs7_pad(message: bytes, block_length: int):
     """
@@ -71,35 +62,33 @@ def encrypt_aes_cbc(message: bytes, iv: bytes, key: bytes):
         ciphertext += cipher_block
     return ciphertext
 
-def decrypt_aes_cbc(cipher: bytes, iv: bytes, key: bytes):
-    if len(cipher) % 16 != 0:
-        raise Exception("ciphertext length must be a multiple of 16")
-    # iv holds the last ciphertext block
-    iv = iv
-    plaintext = b''
-    while len(cipher) > 0:
-        # slice off cipher block
-        cipher_block = cipher[:16]
-        cipher = cipher[16:]
-        # decrypt that block
-        plain_block = decrypt_aes_ecb(cipher_block, key)
-        plain_block = xor_bytes(plain_block, iv)
-        # update iv and append plain_block to plaintext
-        iv = cipher_block
-        plaintext += plain_block
-    return pkcs7_unpad(plaintext)
+# helper
 
-def task10():
-    with open('set2/data/task10.txt') as file:
-        return decrypt_aes_cbc(b64_b(file.read()), bytes(16), b'YELLOW SUBMARINE').decode('ASCII')
+def randbytes(x):
+    return os.urandom(x)
 
-# test
+def encryption_oracle(m):
+    k = randbytes(16)
+    x = randbytes(random.randint(5,10))
+    y = randbytes(random.randint(5,10))
+    m = x + m + y
+    use_ecb = random.randint(0,1)
+    if use_ecb == 1:
+        return encrypt_aes_ecb(m, k), True
+    else:
+        iv = randbytes(16)
+        return encrypt_aes_cbc(m, iv, k), False
 
-m = b'Very cool test string for encryption'
-iv = b'1234567890123456'
-k = b'6543210987654321'
-assert decrypt_aes_cbc(encrypt_aes_cbc(m, iv, k), iv, k) == m
+def decider(encryption_oracle):
+    is_ecb = True
+    m = (11+16+16+11) * b'1'
+    c, is_ecb_original = encryption_oracle(m)
+    if c[16:32] != c[32:48]:
+        is_ecb = False
+    return is_ecb, is_ecb_original
 
-assert task10().startswith("I'm back and I'm ringin' the bell")
+for i in range(50):
+    is_ecb, is_ecb_original = decider(encryption_oracle)
+    assert is_ecb == is_ecb_original
 
-print("Task 10 successful!")
+print("Task 11 successful!")

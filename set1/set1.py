@@ -211,3 +211,5 @@ assert task7().startswith("I'm back and I'm ringin' the bell")
 
 # task8
 assert task8()[0] == 132 # this line is ecb mode
+
+print("Set 1 successful!")

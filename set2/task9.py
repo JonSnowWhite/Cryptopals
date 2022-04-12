@@ -13,3 +13,5 @@ def pkcs7_pad(message: bytes, block_length: int):
     
 
 assert pkcs7_pad(b'YELLOW SUBMARINE', 20) == b'YELLOW SUBMARINE\x04\x04\x04\x04'
+
+print("Task 9 successful!")
